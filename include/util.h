@@ -15,4 +15,7 @@
  * @param str Ponteiro para a string da qual o CRLF deve ser removido.
  */
 void remover_clrf(char *str);
+
+char * from_int_to_string(int number);
+
 #endif //UTIL_H

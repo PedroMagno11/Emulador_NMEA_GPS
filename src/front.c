@@ -38,7 +38,8 @@ void mostrarMenu() {
         "1 - NMEA via porta Serial",
         "2 - NMEA via Servidor TCP",
         "3 - NMEA via HTTP",
-        "4 - Sair"
+        "4 - NMEA via MQTT",
+        "5 - Sair"
     };
 
     for (int i = 0; i < sizeof(opcoes) / sizeof(opcoes[0]); i++) {

@@ -5,6 +5,10 @@ set(CMAKE_C_STANDARD 17)
 
 include_directories(include)
 
+# Diretórios da biblioteca MQTT
+include_directories(include "C:/AmbienteDeDesenvolvimento/C_Projects/libs/paho.mqtt.c/src")
+link_directories("C:/AmbienteDeDesenvolvimento/C_Projects/libs/paho.mqtt.c/build/src")
+
 add_executable(Emulador_NMEA_GPS src/main.c
         src/gps.c
         src/util.c
@@ -18,6 +22,8 @@ add_executable(Emulador_NMEA_GPS src/main.c
         src/rede_util.c
         include/comunicacao_serial.h
         src/comunicacao_serial.c
+        include/comunicacao_mqtt.h
+        src/comunicacao_mqtt.c
 )
 
 #
@@ -61,4 +67,5 @@ add_executable(teste_util test/teste_util.c
         src/util.c
 )
 
-target_link_libraries(Emulador_NMEA_GPS ws2_32)
+# Linka as bibliotecas: socket + MQTT
+target_link_libraries(Emulador_NMEA_GPS ws2_32 paho-mqtt3c)

@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <conio.h>
 #include <windows.h>
-#include <stdlib.h>
 
+#include "comunicacao_mqtt.h"
 #include "comunicacao_serial.h"
 #include "comunicacao_tcp.h"
 #include "front.h"
@@ -93,19 +93,19 @@ int main(void) {
 
             case 2:
                 char enderecoDoServidor[256];
-                int porta;
+                int portaDoServidor;
                 getchar(); // Consome o \n que ficou do scanf anterior
                 printf("Ip do servidor:");
                 fgets(enderecoDoServidor, sizeof(enderecoDoServidor), stdin);
                 remover_clrf(enderecoDoServidor);
                 printf("Porta:");
-                scanf("%d", &porta);
+                scanf("%d", &portaDoServidor);
                 getchar();
-                printf("\nIniciando conexão com o servidor: %s e porta: %d\n", enderecoDoServidor, porta);
+                printf("\nIniciando conexão com o servidor: %s e porta: %d\n", enderecoDoServidor, portaDoServidor);
 
                 // Inicia o socket
                 inicializarWinsock();
-                SOCKET clientSocket = conectarAoServidor(enderecoDoServidor, porta);
+                SOCKET clientSocket = conectarAoServidor(enderecoDoServidor, portaDoServidor);
                 char sentencaNmea[256];
 
                 // gera sentença NMEA
@@ -120,19 +120,44 @@ int main(void) {
             break;
 
             case 3:
+                int portaDoServidorWeb;
                 getchar();
                 printf("Porta:");
-                scanf("%d", &porta);
+                scanf("%d", &portaDoServidorWeb);
                 getchar();
                 printf("\nIniciando servidor web");
                 char sentenca[256];
 
                 // gera sentença NMEA
                 gerarSentencaGPGGA(posicao,sentenca,gerarQuantidadeSatelites(),gerarAltitude(),gerarSeparacaoGeoide());
-                executarServidorWeb(porta,posicao,sentenca);
+                executarServidorWeb(portaDoServidorWeb,posicao,sentenca);
             break;
 
             case 4:
+                char enderecoDoBroker[256];
+                int portaDoBroker;
+                char topico[512];
+                getchar();
+                printf("Endereço do broker: ");
+                fgets(enderecoDoBroker, sizeof(enderecoDoBroker), stdin);
+                remover_clrf(enderecoDoBroker);
+                printf("Porta: ");
+                scanf("%d", &portaDoBroker);
+                getchar();
+                printf("Publicar no tópico: ");
+                fgets(topico, sizeof(topico), stdin);
+                if(mqtt_connect(enderecoDoBroker, portaDoBroker, "MeuNotebook") != 0) {
+                    return -1;
+                }
+
+                char sentencaNMEAMqtt[256];
+                // gera sentença NMEA
+                gerarSentencaGPGGA(posicao,sentencaNMEAMqtt,gerarQuantidadeSatelites(),gerarAltitude(),gerarSeparacaoGeoide());
+                publish(topico, sentencaNMEAMqtt);
+                mqtt_disconnect();
+            break;
+
+            case 5:
                 printf("Encerrando...");
                 break;
             default:
