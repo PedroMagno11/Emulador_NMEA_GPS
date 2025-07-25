@@ -1,22 +1,14 @@
-#include <stdint.h>
 #include <stdio.h>
-#include <conio.h>
-#include <windows.h>
-
-#include "comunicacao_mqtt.h"
-#include "comunicacao_serial.h"
-#include "comunicacao_tcp.h"
 #include "front.h"
 #include "gps.h"
-#include "rede_util.h"
-#include "util.h"
-#include "web_server.h"
+#include "modo_comunicacao_mqtt.h"
+#include "modo_comunicacao_serial.h"
+#include "modo_comunicacao_web.h"
+
+void iniciarFrontEnd();
 
 int main(void) {
-
-    mostrarCabecalho();
-    mostrarDescricao();
-    mostrarMenu();
+    iniciarFrontEnd();
 
     // Coleta a opção do menu
     int opcaoDoMenu;
@@ -52,110 +44,20 @@ int main(void) {
 
     switch (opcaoDoMenu) {
             case 1:
-                getchar();
-                printf("Porta Serial (\\\\.\\SERIAL): ");
-                char portaSerial[10];
-                fgets(portaSerial, 10, stdin);
-                printf("%s\n", portaSerial);
-                printf("Baud Rate: ");
-                uint32_t baudRate;
-                scanf("%u", &baudRate);
-                char sentencaNmeaQueSeraEnviadaViaPortaSerial[256];
-                gerarSentencaGPGGA(posicao, sentencaNmeaQueSeraEnviadaViaPortaSerial, gerarQuantidadeSatelites(), gerarAltitude(), gerarSeparacaoGeoide());
-
-                while(1) {
-                    printf("%s\n", sentencaNmeaQueSeraEnviadaViaPortaSerial);
-
-                    // Muda o comportamento do terminal
-                    if(_kbhit()) {
-                        char caracterPressionado = _getch();
-                        if(caracterPressionado == '\r') {
-                            break;
-                        }
-                    }
-
-                    if(escreverNaPortaSerial(portaSerial, sentencaNmeaQueSeraEnviadaViaPortaSerial) < 0) {
-                        CloseHandle(portaSerial);
-                        return 1;
-                    }
-
-                    Sleep(1000);
-                    char response[256];
-                    int bytesLidos = lerNaPortaSerial(portaSerial, response, sizeof(response));
-                    if (bytesLidos > 0) {
-                        printf("[+] -> Resposta do microcontrolador: %s\n", response);
-                    } else {
-                        printf("Nenhuma resposta recebida.\n");
-                    }
-                }
-            CloseHandle(portaSerial);
+                executar_modo_comunicacao_serial(posicao);
             break;
 
             case 2:
-                char enderecoDoServidor[256];
-                int portaDoServidor;
-                getchar(); // Consome o \n que ficou do scanf anterior
-                printf("Ip do servidor:");
-                fgets(enderecoDoServidor, sizeof(enderecoDoServidor), stdin);
-                remover_clrf(enderecoDoServidor);
-                printf("Porta:");
-                scanf("%d", &portaDoServidor);
-                getchar();
-                printf("\nIniciando conexão com o servidor: %s e porta: %d\n", enderecoDoServidor, portaDoServidor);
-
-                // Inicia o socket
-                inicializarWinsock();
-                SOCKET clientSocket = conectarAoServidor(enderecoDoServidor, portaDoServidor);
-                char sentencaNmea[256];
-
-                // gera sentença NMEA
-                gerarSentencaGPGGA(posicao,sentencaNmea,gerarQuantidadeSatelites(),gerarAltitude(),gerarSeparacaoGeoide());
-                enviarSentenca(clientSocket, sentencaNmea);
-
-                // recebe dados do servidor
-                char recebido[200];
-                receberDadosDoServidor(clientSocket, recebido, 200);
-                // encerra conexão
-                encerrarConexao(clientSocket);
+                executar_modo_comunicacao_web(posicao);
             break;
 
             case 3:
-                int portaDoServidorWeb;
-                getchar();
-                printf("Porta:");
-                scanf("%d", &portaDoServidorWeb);
-                getchar();
-                printf("\nIniciando servidor web");
-                char sentenca[256];
-
-                // gera sentença NMEA
-                gerarSentencaGPGGA(posicao,sentenca,gerarQuantidadeSatelites(),gerarAltitude(),gerarSeparacaoGeoide());
-                executarServidorWeb(portaDoServidorWeb,posicao,sentenca);
+                executar_modo_comunicacao_web(posicao);
             break;
 
             case 4:
-                char enderecoDoBroker[256];
-                int portaDoBroker;
-                char topico[512];
-                getchar();
-                printf("Endereço do broker: ");
-                fgets(enderecoDoBroker, sizeof(enderecoDoBroker), stdin);
-                remover_clrf(enderecoDoBroker);
-                printf("Porta: ");
-                scanf("%d", &portaDoBroker);
-                getchar();
-                printf("Publicar no tópico: ");
-                fgets(topico, sizeof(topico), stdin);
-                if(mqtt_connect(enderecoDoBroker, portaDoBroker, "MeuNotebook") != 0) {
-                    return -1;
-                }
-
-                char sentencaNMEAMqtt[256];
-                // gera sentença NMEA
-                gerarSentencaGPGGA(posicao,sentencaNMEAMqtt,gerarQuantidadeSatelites(),gerarAltitude(),gerarSeparacaoGeoide());
-                publish(topico, sentencaNMEAMqtt);
-                mqtt_disconnect();
-            break;
+                executar_modo_comunicacao_mqtt(posicao);
+                break;
 
             case 5:
                 printf("Encerrando...");
@@ -164,4 +66,10 @@ int main(void) {
                 printf("\nOpcao invalida");
     }
 
+}
+
+void iniciarFrontEnd() {
+    mostrarCabecalho();
+    mostrarDescricao();
+    mostrarMenu();
 }

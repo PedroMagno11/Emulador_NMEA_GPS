@@ -10,20 +10,28 @@ include_directories(include "C:/AmbienteDeDesenvolvimento/C_Projects/libs/paho.m
 link_directories("C:/AmbienteDeDesenvolvimento/C_Projects/libs/paho.mqtt.c/build/src")
 
 add_executable(Emulador_NMEA_GPS src/main.c
-        src/gps.c
-        src/util.c
+        src/domain/gps.c
+        src/utils/util.c
         include/comunicacao_tcp.h
-        src/comunicacao_tcp.c
+        src/infraestrutura/comunicacao_tcp.c
         include/front.h
         src/front.c
         include/web_server.h
-        src/web_server.c
+        src/infraestrutura/web_server.c
         include/rede_util.h
-        src/rede_util.c
+        src/utils/rede_util.c
         include/comunicacao_serial.h
-        src/comunicacao_serial.c
+        src/infraestrutura/comunicacao_serial.c
         include/comunicacao_mqtt.h
-        src/comunicacao_mqtt.c
+        src/infraestrutura/comunicacao_mqtt.c
+        src/modos_comunicacao_service/modo_comunicacao_mqtt.c
+        src/modos_comunicacao_service/modo_comunicacao_serial.c
+        src/modos_comunicacao_service/modo_comunicacao_tcp.c
+        src/modos_comunicacao_service/modo_comunicacao_web.c
+        include/modo_comunicacao_mqtt.h
+        include/modo_comunicacao_web.h
+        include/modo_comunicacao_tcp.h
+        include/modo_comunicacao_serial.h
 )
 
 #
@@ -53,18 +61,18 @@ message("CMake patch version   : ${CMAKE_PATCH_VERSION}")
 message("System host name     : ${CMAKE_HOST_SYSTEM_NAME}")
 message("Project directory     : ${CMAKE_BINARY_DIR}")
 message("")
-add_executable(teste_gps test/teste_gps.c src/gps.c
+add_executable(teste_gps test/teste_gps.c src/domain/gps.c
         include/util.h
-        src/util.c
+        src/utils/util.c
 )
 add_library(gps include/gps.h
-        src/gps.c
+        src/domain/gps.c
         include/util.h
-        src/util.c
+        src/utils/util.c
 )
 add_executable(teste_util test/teste_util.c
         include/util.h
-        src/util.c
+        src/utils/util.c
 )
 
 # Linka as bibliotecas: socket + MQTT

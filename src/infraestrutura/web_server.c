@@ -1,11 +1,11 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <stdio.h>
-#include "web_server.h"
+#include "../../include/web_server.h"
 
-#include "gps.h"
-#include "rede_util.h"
-#include "util.h"
+#include "../../include/gps.h"
+#include "../../include/rede_util.h"
+#include "../../include/util.h"
 
 #pragma comment(lib, "Ws2_32.lib")
 
