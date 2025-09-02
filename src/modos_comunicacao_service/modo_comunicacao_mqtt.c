@@ -29,9 +29,7 @@ void executar_modo_comunicacao_mqtt(t_posicao posicao) {
         printf("Erro na conexão MQTT.\n");
         return;
     }
-
     char sentenca[256];
-    gerarSentencaGPGGA(posicao, sentenca, gerarQuantidadeSatelites(), gerarAltitude(), gerarSeparacaoGeoide());
 
     while(1) {
         // Muda o comportamento do terminal
@@ -41,6 +39,7 @@ void executar_modo_comunicacao_mqtt(t_posicao posicao) {
                 break;
             }
         }
+        gerarSentencaGPGGA(posicao, sentenca, gerarQuantidadeSatelites(), gerarAltitude(), gerarSeparacaoGeoide());
         publish(topico, sentenca);
 
 
